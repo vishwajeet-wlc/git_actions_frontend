@@ -28,10 +28,11 @@ jobs:
       - name: Deploy via SSH
         run: |
           ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Create frontend directory if it doesn't exist
-            mkdir -p ~/frontend
-            # Remove old build
-            rm -rf ~/frontend/*
+            # Remove old build from nginx html directory
+            sudo rm -rf /var/www/html/*
             exit
           EOF
-          scp -o StrictHostKeyChecking=no -i key.pem -r dist/* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/frontend/
+          scp -o StrictHostKeyChecking=no -i key.pem -r dist/* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/tmp/
+          ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
+            sudo mv /tmp/* /var/www/html/
+          EOF
